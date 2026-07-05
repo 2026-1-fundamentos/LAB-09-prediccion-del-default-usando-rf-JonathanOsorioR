@@ -103,10 +103,11 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
 import json
+import time
 from sklearn.metrics import (
     precision_score, balanced_accuracy_score, recall_score, f1_score, confusion_matrix
 )
-
+inicio = time.time()
 input = glob.glob("files/input/*.zip")
 train_path = [f for f in input if "train" in f.lower()][0]
 test_path = [f for f in input if "test" in f.lower()][0]
@@ -196,4 +197,4 @@ test_m, test_cm = calcular_y_guardar_metricas(x_test, y_test, grid_search, 'test
 with open("files/output/metrics.json", "w") as f:
     for item in [train_m, test_m, train_cm, test_cm]:
         f.write(json.dumps(item) + "\n")
-print("fin")
+fin = time.time()
