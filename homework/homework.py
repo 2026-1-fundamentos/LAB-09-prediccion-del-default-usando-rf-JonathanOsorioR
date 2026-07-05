@@ -108,7 +108,8 @@ from sklearn.metrics import (
 )
 
 input = glob.glob("files/input/*.zip")
-dfs = [pd.read_csv(i,compression="zip") for i in input]
+train_path = [f for f in input if "train" in f.lower()][0]
+test_path = [f for f in input if "test" in f.lower()][0]
 
 def limpieza(df):
     df = df.copy()
@@ -119,7 +120,8 @@ def limpieza(df):
     df.loc[df['EDUCATION'] > 4, 'EDUCATION'] = 4
     return df
 
-test,train = [limpieza(i) for i in dfs]
+train = limpieza(pd.read_csv(train_path, compression="zip"))
+test = limpieza(pd.read_csv(test_path, compression="zip"))
 x_test, y_test = test.drop(columns = "default"),test["default"]
 x_train, y_train = train.drop(columns = "default"),train["default"]
 
@@ -143,7 +145,7 @@ pipeline = Pipeline(steps=[
 ])
 
 param_grid = {
-    'classifier__n_estimators': [100, 200, 300],      # Número de árboles en el bosque
+    'classifier__n_estimators': [100,200,300],      # Número de árboles en el bosque
     'classifier__max_depth': [None, 20, 30],
     'classifier__min_samples_split': [2, 5, 10],    # Profundidad máxima del árbol
 }
@@ -194,3 +196,4 @@ test_m, test_cm = calcular_y_guardar_metricas(x_test, y_test, grid_search, 'test
 with open("files/output/metrics.json", "w") as f:
     for item in [train_m, test_m, train_cm, test_cm]:
         f.write(json.dumps(item) + "\n")
+print("fin")
