@@ -132,7 +132,7 @@ preprocessor = ColumnTransformer(
     transformers=[
         (
             'cat', 
-            OneHotEncoder(handle_unknown='ignore'), # 'ignore' evita errores si aparece algo nuevo en el test
+            OneHotEncoder(handle_unknown='ignore'),
             noNumericas
         )
     ],
@@ -146,17 +146,18 @@ pipeline = Pipeline(steps=[
 ])
 
 param_grid = {
-    'classifier__n_estimators': [100,200,300],      # Número de árboles en el bosque
-    'classifier__max_depth': [None, 20, 30],
-    'classifier__min_samples_split': [2, 5, 10],    # Profundidad máxima del árbol
+    'classifier__n_estimators': [300],
+    'classifier__max_depth': [20],#[None, 20, 30]
+    'classifier__min_samples_split': [2],
 }
 
 grid_search = GridSearchCV(
-    estimator=pipeline,           # Tu pipeline creado en el paso 3
-    param_grid=param_grid,        # Las combinaciones a probar
-    cv=10,                        # 10 splits (validación cruzada)
-    scoring='balanced_accuracy',  # La métrica que te pidió el ejercicio
-    n_jobs=-1                     # Usa todos los procesadores de tu PC para ir más rápido
+    estimator=pipeline,
+    param_grid=param_grid,
+    cv=10,
+    scoring='balanced_accuracy',
+    n_jobs=-1,
+    verbose = 3             
 )
 grid_search.fit(x_train, y_train)
 
@@ -170,7 +171,6 @@ os.makedirs("files/output", exist_ok=True)
 def calcular_y_guardar_metricas(x, y, model, dataset_name):
     y_pred = model.predict(x)
     
-    # Calculamos las métricas clave
     metricas = {
         "type": "metrics",
         'dataset': dataset_name,
@@ -180,7 +180,6 @@ def calcular_y_guardar_metricas(x, y, model, dataset_name):
         'f1_score': f1_score(y, y_pred)
     }
     
-    # Calculamos la matriz de confusión
     cm = confusion_matrix(y, y_pred)
     matriz = {
         'type': 'cm_matrix',
@@ -198,3 +197,5 @@ with open("files/output/metrics.json", "w") as f:
     for item in [train_m, test_m, train_cm, test_cm]:
         f.write(json.dumps(item) + "\n")
 fin = time.time()
+
+print("Mejores parámetros:", grid_search.best_params_)
